@@ -8,11 +8,11 @@ const sendEmail = async (to, subject, text) => {
         }
 
         const transporter = nodemailer.createTransport({
-            host: 'smtp-relay.brevo.com',
+            host: process.env.SMTP_SERVER,
             port: 587,
             auth: {
-                user: 'cugatesysadm@gmail.com',
-                pass: 'q6cRj9pUFbyJfmzv'
+                user: process.env.SMTP_EMAIL,
+                pass: process.env.SMTP_PASSWORD
             }
         });
 
