@@ -65,7 +65,8 @@ app.get('/auth/google/callback',
                     email: googleEmail,
                     googleId: id,
                     profilePicture,
-                    password: "password"
+                    password: "password",
+                    phoneNumber: id
                 });
             } else {
                 user.googleId = user.googleId || id;
