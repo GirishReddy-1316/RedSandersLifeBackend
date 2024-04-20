@@ -180,9 +180,8 @@ exports.getProfile = async (req, res) => {
 
 exports.sendOTP = async (req, res) => {
     try {
-
-        const { phoneNumber } = req.body;
-        const user = await User.findOne({ phoneNumber });
+        const { email, phone } = req.body;
+        const user = await User.findOne({ $or: [{ email: email }, { phoneNumber: phone }] });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -203,8 +202,8 @@ exports.sendOTP = async (req, res) => {
 
 exports.verifyPasswordOTP = async (req, res) => {
     try {
-        const { emailOrPhone, otp } = req.body;
-        const user = await User.findOne({ $or: [{ email: emailOrPhone }, { phoneNumber: emailOrPhone }] });
+        const { email, phone, otp } = req.body;
+        const user = await User.findOne({ $or: [{ email: email }, { phoneNumber: phone }] });
 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
