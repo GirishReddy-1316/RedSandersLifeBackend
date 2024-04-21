@@ -1,3 +1,4 @@
+const { default: mongoose } = require('mongoose');
 const Order = require('../models/order');
 const User = require('../models/user');
 
@@ -55,10 +56,16 @@ exports.getOrdersByUserId = async (req, res) => {
 exports.getAllOrders = async (req, res) => {
     try {
         const orderId = req.query.orderId;
-        console.log(orderId);
         let orders;
         if (orderId) {
+            const isValidObjectId = mongoose.Types.ObjectId.isValid(orderId);
+            if (!isValidObjectId) {
+                return res.status(400).json({ message: 'Invalid orderId format' });
+            }
             orders = await Order.find({ _id: orderId }).populate('products.productId', 'name brandName');
+            if (!orders || orders.length === 0) {
+                return res.status(404).json({ message: 'Order not found' });
+            }
         } else {
             orders = await Order.find({}).populate('products.productId', 'name brandName');
         }
