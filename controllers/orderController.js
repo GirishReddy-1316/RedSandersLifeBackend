@@ -9,7 +9,7 @@ exports.createOrder = async (req, res) => {
             return res.status(400).json({ message: 'Total price must be a valid number greater than 0' });
         }
 
-        if (!shippingAddress || typeof shippingAddress !== 'string' || shippingAddress.trim() === '') {
+        if (!shippingAddress || typeof shippingAddress !== 'object' || Object.keys(shippingAddress).length === 0) {
             return res.status(400).json({ message: 'Shipping address is required' });
         }
 
@@ -43,7 +43,8 @@ exports.getOrdersByUserId = async (req, res) => {
         if (!userId) {
             return res.status(400).json({ message: 'User ID is required' });
         }
-        const orders = await Order.find({ customerId: userId });
+        console.log(userId);
+        const orders = await Order.find({ customerId: userId }).populate('products.productId', 'name brandName');
         res.status(200).json(orders);
     } catch (error) {
         console.error('Error fetching orders:', error);
@@ -51,13 +52,29 @@ exports.getOrdersByUserId = async (req, res) => {
     }
 };
 
+exports.getAllOrders = async (req, res) => {
+    try {
+        const orderId = req.query.orderId;
+        console.log(orderId);
+        let orders;
+        if (orderId) {
+            orders = await Order.find({ _id: orderId }).populate('products.productId', 'name brandName');
+        } else {
+            orders = await Order.find({}).populate('products.productId', 'name brandName');
+        }
+        res.status(200).json(orders);
+    } catch (error) {
+        console.error('Error fetching orders:', error);
+        res.status(500).json({ message: 'Error fetching orders' });
+    }
+};
 exports.getOrdersByOrderId = async (req, res) => {
     try {
         const orderId = req.params.orderId;
         if (!orderId) {
             return res.status(400).json({ message: 'Order ID is required' });
         }
-        const orders = await Order.find({ _id: orderId });
+        const orders = await Order.find({ _id: orderId }).populate('products.productId', 'name brandName');
         res.status(200).json(orders);
     } catch (error) {
         console.error('Error fetching orders:', error);

@@ -108,7 +108,8 @@ exports.loginUser = async (req, res) => {
             email: user.email,
             phoneNumber: user.phoneNumber,
             googleEmail: user.googleEmail,
-            profilePicture: user.profilePicture
+            profilePicture: user.profilePicture,
+            address: user.address
         };
         res.status(200).send({ user: formattedUser, token });
     } catch (error) {
@@ -165,7 +166,8 @@ exports.getProfile = async (req, res) => {
                 email: user.email,
                 username: user.username,
                 googleEmail: user.googleEmail,
-                profilePicture: user.profilePicture
+                profilePicture: user.profilePicture,
+                address: user.address
             };
             res.status(200).json({ user: formattedUser, token: user.accessToken });
         } else {

@@ -24,7 +24,7 @@ const orderSchema = new mongoose.Schema({
         required: true
     },
     shippingAddress: {
-        type: String,
+        type: mongoose.Schema.Types.Mixed,
         required: true
     },
     paymentMethod: {

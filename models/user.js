@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
     accessToken: { type: String },
     profilePicture: { type: String },
     razorpayId: { type: String },
-    address: { type: String },
+    address: { type: mongoose.Schema.Types.Mixed },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 });
