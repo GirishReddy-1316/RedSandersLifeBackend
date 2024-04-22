@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String },
     username: { type: String },
     phoneNumber: { type: String },
     googleId: { type: String },
@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema({
     otpExpiry: { type: Date },
     accessToken: { type: String },
     profilePicture: { type: String },
+    isGuest: { type: Boolean, default: false },
     razorpayId: { type: String },
     address: { type: mongoose.Schema.Types.Mixed },
     createdAt: { type: Date, default: Date.now },

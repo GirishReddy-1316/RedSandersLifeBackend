@@ -38,6 +38,54 @@ exports.createOrder = async (req, res) => {
     }
 };
 
+exports.createGuestOrder = async (req, res) => {
+    try {
+        const { products, totalPrice, shippingAddress, paymentMethod } = req.body;
+
+        if (typeof totalPrice !== 'number' || totalPrice <= 0) {
+            return res.status(400).json({ message: 'Total price must be a valid number greater than 0' });
+        }
+
+        if (!shippingAddress || typeof shippingAddress !== 'object' || Object.keys(shippingAddress).length === 0) {
+            return res.status(400).json({ message: 'Shipping address is required' });
+        }
+
+        const allowedPaymentMethods = ['Credit Card', 'Debit Card', 'Net Banking', 'COD'];
+        if (!paymentMethod || !allowedPaymentMethods.includes(paymentMethod)) {
+            return res.status(400).json({ message: 'Invalid payment method. Allowed options are: Credit Card, Debit Card, Net Banking, COD' });
+        }
+
+        let guestUser = await User.findOne({ email: shippingAddress.email, isGuest: true });
+        if (!guestUser) {
+            const lastGuestUser = await User.findOne({ isGuest: true }).sort({ createdAt: -1 });
+            const lastIdNumber = lastGuestUser ? parseInt(lastGuestUser.username.replace('Quest', '')) + 1 : 1;
+            const newUsername = `Quest${lastIdNumber}`;
+
+            guestUser = await User.create({
+                username: newUsername,
+                email: shippingAddress.email,
+                isGuest: true,
+                phoneNumber: shippingAddress.mobile,
+                address: shippingAddress
+            });
+        }
+        await User.findByIdAndUpdate(guestUser._id, { address: shippingAddress });
+        const guestOrderData = {
+            customerId: guestUser._id,
+            products,
+            totalPrice,
+            shippingAddress,
+            paymentMethod,
+            status: 'Placed'
+        };
+        const guestOrder = await Order.create(guestOrderData);
+        res.status(201).json({ orderId: guestOrder._id });
+    } catch (error) {
+        console.error('Error creating guest order:', error);
+        res.status(500).json({ message: 'Error creating guest order' });
+    }
+};
+
 exports.getOrdersByUserId = async (req, res) => {
     try {
         const userId = req.userId;

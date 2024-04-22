@@ -83,6 +83,7 @@ exports.createUser = async (req, res) => {
         delete otpStorage[phoneNumber];
         res.status(201).send({ message: 'User created successfully' });
     } catch (error) {
+        console.log(error);
         res.status(500).send({ message: 'Error creating user', error: error.message });
     }
 };
@@ -109,7 +110,8 @@ exports.loginUser = async (req, res) => {
             phoneNumber: user.phoneNumber,
             googleEmail: user.googleEmail,
             profilePicture: user.profilePicture,
-            address: user.address
+            address: user.address,
+            username: user.username
         };
         res.status(200).send({ user: formattedUser, token });
     } catch (error) {
