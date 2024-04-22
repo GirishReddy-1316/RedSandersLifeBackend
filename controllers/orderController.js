@@ -1,6 +1,7 @@
 const { default: mongoose } = require('mongoose');
 const Order = require('../models/order');
 const User = require('../models/user');
+const GuestUser = require('../models/guest');
 
 exports.createOrder = async (req, res) => {
     try {
@@ -55,21 +56,18 @@ exports.createGuestOrder = async (req, res) => {
             return res.status(400).json({ message: 'Invalid payment method. Allowed options are: Credit Card, Debit Card, Net Banking, COD' });
         }
 
-        let guestUser = await User.findOne({ email: shippingAddress.email, isGuest: true });
-        if (!guestUser) {
-            const lastGuestUser = await User.findOne({ isGuest: true }).sort({ createdAt: -1 });
-            const lastIdNumber = lastGuestUser ? parseInt(lastGuestUser.username.replace('Quest', '')) + 1 : 1;
-            const newUsername = `Quest${lastIdNumber}`;
+        const lastGuestUser = await GuestUser.findOne().sort({ createdAt: -1 });
+        const lastIdNumber = lastGuestUser ? parseInt(lastGuestUser.username.replace('Quest', '')) + 1 : 1;
+        const newUsername = `Quest${lastIdNumber}`;
 
-            guestUser = await User.create({
-                username: newUsername,
-                email: shippingAddress.email,
-                isGuest: true,
-                phoneNumber: shippingAddress.mobile,
-                address: shippingAddress
-            });
-        }
-        await User.findByIdAndUpdate(guestUser._id, { address: shippingAddress });
+        guestUser = await GuestUser.create({
+            username: newUsername,
+            email: shippingAddress.email,
+            isGuest: true,
+            phoneNumber: shippingAddress.mobile,
+            address: shippingAddress
+        });
+
         const guestOrderData = {
             customerId: guestUser._id,
             products,

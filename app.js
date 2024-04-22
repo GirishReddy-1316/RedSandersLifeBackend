@@ -54,7 +54,7 @@ app.get('/auth/google/callback',
     passport.authenticate('google', { failureRedirect: '/login' }),
     async (req, res) => {
         try {
-            const { id, emails, photos } = req.user;
+            const { id, emails, photos, displayName } = req.user;
             const googleEmail = emails[0].value;
             const profilePicture = photos && photos.length > 0 ? photos[0].value : null;
 
@@ -65,10 +65,10 @@ app.get('/auth/google/callback',
                     email: googleEmail,
                     googleId: id,
                     profilePicture,
-                    password: "password",
-                    phoneNumber: id
+                    username: displayName
                 });
             } else {
+                user.displayName = displayName;
                 user.googleId = user.googleId || id;
                 user.googleEmail = user.googleEmail || googleEmail;
                 user.profilePicture = user.profilePicture || profilePicture;
@@ -77,7 +77,7 @@ app.get('/auth/google/callback',
             user.accessToken = token;
 
             await user.save();
-            res.redirect(`${clientURL}?accessToken=${token}`);
+            res.redirect(`${clientURL}?userName=${displayName}&&accessToken=${token}`);
         } catch (error) {
             console.log('Error saving user data:', error);
             return res.status(500).send('Failed to save user data');

@@ -72,6 +72,10 @@ exports.createUser = async (req, res) => {
         }
 
         const existingUser = await User.findOne({ $or: [{ email }, { phoneNumber }] });
+        console.log(existingUser)
+        if (existingUser.googleEmail && existingUser.googleEmail === email) {
+            return res.status(400).json({ message: 'Please continue with Google login as your account was created using Google' });
+        }
         if (existingUser) {
             return res.status(400).send({ message: 'email already exists' });
         }
@@ -96,6 +100,9 @@ exports.loginUser = async (req, res) => {
         if (!user) {
             return res.status(404).send({ message: 'User not found' });
         }
+        if (user.googleEmail && user.googleEmail === emailOrPhone) {
+            return res.status(400).json({ message: 'Please continue with Google login as your account was created using Google' });
+        }
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (!passwordMatch) {
             return res.status(401).send({ message: 'Invalid password' });
@@ -115,6 +122,7 @@ exports.loginUser = async (req, res) => {
         };
         res.status(200).send({ user: formattedUser, token });
     } catch (error) {
+
         res.status(500).send({ message: 'Error logging in', error: error.message });
     }
 };
@@ -190,6 +198,11 @@ exports.sendOTP = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
+
+        if (user.googleEmail && user.googleEmail === email) {
+            return res.status(400).json({ message: 'Please continue with Google login as your account was created using Google' });
+        }
+
         const otp = generateOTP(4);
         user.otp = otp;
         user.otpExpiry = new Date(Date.now() + 10 * 60000);
@@ -214,13 +227,17 @@ exports.verifyPasswordOTP = async (req, res) => {
         }
         console.log(user, otp, typeof (otp));
 
+        if (user.googleEmail && user.googleEmail === email) {
+            return res.status(400).json({ message: 'Please continue with Google login as your account was created using Google' });
+        }
+
         if (user.otp !== Number(otp) || user.otpExpiry < new Date()) {
             return res.status(400).json({ message: 'Invalid or expired OTP' });
         }
         user.otp = null;
         user.otpExpiry = null;
         await user.save();
-        res.status(200).json({ message: 'Otp verify successful' });
+        res.status(200).json({ message: 'OTP verify successful' });
     } catch (error) {
         console.error('Error Otp verify:', error);
         res.status(500).json({ message: 'Error Otp verify' });
