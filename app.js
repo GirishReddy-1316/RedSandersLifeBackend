@@ -68,7 +68,7 @@ app.get('/auth/google/callback',
                     username: displayName
                 });
             } else {
-                user.displayName = displayName;
+                user.username = displayName;
                 user.googleId = user.googleId || id;
                 user.googleEmail = user.googleEmail || googleEmail;
                 user.profilePicture = user.profilePicture || profilePicture;
