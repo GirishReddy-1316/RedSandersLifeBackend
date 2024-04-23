@@ -72,8 +72,7 @@ exports.createUser = async (req, res) => {
         }
 
         const existingUser = await User.findOne({ $or: [{ email }, { phoneNumber }] });
-        console.log(existingUser)
-        if (existingUser.googleEmail && existingUser.googleEmail === email) {
+        if (existingUser && existingUser.googleEmail && existingUser.googleEmail === email) {
             return res.status(400).json({ message: 'Please continue with Google login as your account was created using Google' });
         }
         if (existingUser) {
@@ -199,7 +198,7 @@ exports.sendOTP = async (req, res) => {
         }
 
 
-        if (user.googleEmail && user.googleEmail === email) {
+        if (user && user.googleEmail && user.googleEmail === email) {
             return res.status(400).json({ message: 'Please continue with Google login as your account was created using Google' });
         }
 
@@ -227,7 +226,7 @@ exports.verifyPasswordOTP = async (req, res) => {
         }
         console.log(user, otp, typeof (otp));
 
-        if (user.googleEmail && user.googleEmail === email) {
+        if (user && user.googleEmail && user.googleEmail === email) {
             return res.status(400).json({ message: 'Please continue with Google login as your account was created using Google' });
         }
 
