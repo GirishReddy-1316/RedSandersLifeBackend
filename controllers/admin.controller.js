@@ -14,8 +14,6 @@ exports.adminLogin = async (req, res) => {
         if (!admin) {
             return res.status(404).json({ message: 'Admin not found' });
         }
-        console.log(admin)
-
         const passwordMatch = await bcrypt.compare(password, admin.password);
         if (!passwordMatch) {
             return res.status(401).json({ message: 'Invalid password' });
@@ -79,11 +77,12 @@ exports.getOrdersList = async (req, res) => {
     }
 };
 
+
 exports.createAdmin = async (req, res) => {
     try {
         const { username, email, password } = req.body;
 
-        const existingAdmin = await User.findOne({ email });
+        const existingAdmin = await Admin.findOne({ email });
         if (existingAdmin) {
             return res.status(400).send({ message: 'email already exists' });
         }
@@ -112,5 +111,34 @@ exports.getUsers = async (req, res) => {
         res.status(200).json(users);
     } catch (error) {
         res.status(500).send({ message: 'Error retrieving users', error: error.message });
+    }
+};
+
+exports.deleteUser = async (req, res) => {
+    const userId = req.params.id;
+    try {
+        const deletedUser = await User.findByIdAndDelete(userId);
+        if (!deletedUser) {
+            return res.status(404).send({ message: 'User not found' });
+        }
+        res.status(200).send({ message: 'User deleted successfully' });
+    } catch (error) {
+        res.status(500).send({ message: 'Error deleting user', error: error.message });
+    }
+};
+
+
+exports.EditUser = async (req, res) => {
+    const userId = req.params.id;
+    const { username, email, phoneNumber, address } = req.body;  // assuming fields to update
+    try {
+        console.log(req.body);
+        const updatedUser = await User.findByIdAndUpdate(userId, { username, email }, { new: true });
+        if (!updatedUser) {
+            return res.status(404).send({ message: 'User not found' });
+        }
+        res.status(200).send({ message: 'User updated successfully', user: updatedUser });
+    } catch (error) {
+        res.status(500).send({ message: 'Error updating user', error: error.message });
     }
 };

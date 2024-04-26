@@ -81,7 +81,7 @@ app.get('/auth/google/callback',
             res.redirect(`${clientURL}?userName=${displayName}&&accessToken=${token}`);
         } catch (error) {
             console.log('Error saving user data:', error);
-            return res.status(500).send('Failed to save user data');
+            return res.redirect(`${clientURL}/account`);
         }
     }
 );

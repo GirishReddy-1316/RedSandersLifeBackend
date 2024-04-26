@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 
 exports.adminAuth = (req, res, next) => {
     try {
+        console.log('admin', req.headers.authorization)
         const token = req.headers.authorization.split(' ')[1];
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.adminId = decoded.adminId;

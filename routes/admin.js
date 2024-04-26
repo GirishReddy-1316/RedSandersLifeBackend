@@ -10,7 +10,9 @@ adminRouter.post('/logout', adminAuth, adminController.adminLogout);
 adminRouter.post('/search', adminAuth, adminController.searchProducts);
 adminRouter.post('/oderList', adminAuth, adminController.getOrdersList);
 adminRouter.post('/create', adminController.createAdmin);
-adminRouter.post('/customer-list', adminAuth, adminController.getUsers);
+adminRouter.delete('/users/:id', adminAuth, adminController.deleteUser);
+adminRouter.put('/users/:id', adminAuth, adminController.EditUser);
+adminRouter.get('/customer-list', adminAuth, adminController.getUsers);
 
 
 module.exports = adminRouter;
