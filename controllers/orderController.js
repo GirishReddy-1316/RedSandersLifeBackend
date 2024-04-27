@@ -51,9 +51,8 @@ exports.createGuestOrder = async (req, res) => {
             return res.status(400).json({ message: 'Shipping address is required' });
         }
 
-        const allowedPaymentMethods = ['Credit Card', 'Debit Card', 'Net Banking', 'COD'];
-        if (!paymentMethod || !allowedPaymentMethods.includes(paymentMethod)) {
-            return res.status(400).json({ message: 'Invalid payment method. Allowed options are: Credit Card, Debit Card, Net Banking, COD' });
+        if (!paymentMethod) {
+            return res.status(400).json({ message: 'Invalid payment method.' });
         }
 
         const lastGuestUser = await GuestUser.findOne().sort({ createdAt: -1 });

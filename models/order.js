@@ -28,8 +28,7 @@ const orderSchema = new mongoose.Schema({
         required: true
     },
     paymentMethod: {
-        type: String,
-        enum: ['Credit Card', 'Debit Card', 'Net Banking', 'COD'],
+        type: mongoose.Schema.Types.Mixed,
         required: true
     },
     status: {
