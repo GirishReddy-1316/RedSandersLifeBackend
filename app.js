@@ -12,6 +12,7 @@ const User = require('./models/user');
 const orderRouter = require('./routes/order');
 const { generateToken } = require('./utils/generateOTP');
 const adminRouter = require('./routes/admin');
+const phonePeRouter = require('./routes/phonepe');
 
 require('dotenv').config();
 
@@ -93,6 +94,7 @@ app.use('/api', contactRouter);
 app.use('/api', productRouter);
 app.use('/api/order', orderRouter)
 app.use('/api/admin', adminRouter)
+app.use("/api/payment", phonePeRouter);
 
 app.listen(PORT, () => {
     connectDB()
