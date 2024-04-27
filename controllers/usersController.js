@@ -6,14 +6,13 @@ const { default: mongoose } = require('mongoose');
 
 // Temporary storage for OTPs and their expiry times
 let otpStorage = {};
-console.log(otpStorage)
 
 exports.generateOTP = async (req, res) => {
     try {
         const { email, phoneNumber } = req.body;
 
         // Check if the email or phone number already exists in the database
-        const existingUser = await User.findOne({ $or: [{ email }, { phoneNumber }] });
+        const existingUser = await User.findOne({ $or: [{ email: { $regex: '^' + email + '$', $options: '' } }, { phoneNumber }] });
 
         if (existingUser) {
             return res.status(400).json({ message: 'User already exists' });
@@ -47,7 +46,6 @@ exports.verifyOTP = async (req, res) => {
 
         const storedOtp = storedOtpDataByEmail.otp;
         const storedOtpExpiry = storedOtpDataByEmail.expiry;
-        console.log(otpStorage);
         if (storedOtp !== Number(otp) || storedOtpExpiry < new Date()) {
             return res.status(400).json({ message: 'Invalid or expired OTP' });
         }
@@ -95,7 +93,7 @@ exports.createUser = async (req, res) => {
 exports.loginUser = async (req, res) => {
     try {
         const { emailOrPhone, password, username = "" } = req.body;
-        const user = await User.findOne({ $or: [{ email: emailOrPhone }, { phoneNumber: emailOrPhone }] });
+        const user = await User.findOne({ $or: [{ email: { $regex: '^' + emailOrPhone + '$', $options: 'i' } }, { phoneNumber: emailOrPhone }] });
         if (!user) {
             return res.status(404).send({ message: 'User not found' });
         }
@@ -192,7 +190,7 @@ exports.getProfile = async (req, res) => {
 exports.sendOTP = async (req, res) => {
     try {
         const { email, phone } = req.body;
-        const user = await User.findOne({ $or: [{ email: email }, { phoneNumber: phone }] });
+        const user = await User.findOne({ $or: [{ email: { $regex: '^' + emailOrPhone + '$', $options: '' } }, { phoneNumber: phone }] });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -219,7 +217,7 @@ exports.sendOTP = async (req, res) => {
 exports.verifyPasswordOTP = async (req, res) => {
     try {
         const { email, phone, otp } = req.body;
-        const user = await User.findOne({ $or: [{ email: email }, { phoneNumber: phone }] });
+        const user = await User.findOne({ $or: [{ email: { $regex: '^' + email + '$', $options: '' } }, { phoneNumber: phone }] });
 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
@@ -247,7 +245,7 @@ exports.verifyPasswordOTP = async (req, res) => {
 exports.resetPassword = async (req, res) => {
     try {
         const { EmailOrPhone, password } = req.body;
-        const user = await User.findOne({ $or: [{ email: EmailOrPhone }, { phoneNumber: EmailOrPhone }] });
+        const user = await User.findOne({ $or: [{ email: { $regex: '^' + EmailOrPhone + '$', $options: 'i' } }, { phoneNumber: EmailOrPhone }] });
 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
