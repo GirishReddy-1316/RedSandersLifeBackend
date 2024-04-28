@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
     profilePicture: { type: String },
     isGuest: { type: Boolean, default: false },
     razorpayId: { type: String },
-    address: { type: mongoose.Schema.Types.Mixed },
+    address: { type: mongoose.Schema.Types.Mixed, default: {} },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 });

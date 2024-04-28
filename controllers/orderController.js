@@ -18,7 +18,9 @@ exports.createOrder = async (req, res) => {
         if (!paymentMethod) {
             return res.status(400).json({ message: 'Invalid payment method.' });
         }
-        await User.findByIdAndUpdate(req.userId, { address: req.body.shippingAddress });
+        let user = await User.findOne({ _id: req.userId });
+        user.address = shippingAddress;
+        user.save();
 
         const orderData = {
             customerId: req.userId,
