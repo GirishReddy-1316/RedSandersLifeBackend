@@ -15,11 +15,9 @@ exports.createOrder = async (req, res) => {
             return res.status(400).json({ message: 'Shipping address is required' });
         }
 
-        const allowedPaymentMethods = ['Credit Card', 'Debit Card', 'Net Banking', 'COD'];
-        if (!paymentMethod || !allowedPaymentMethods.includes(paymentMethod)) {
-            return res.status(400).json({ message: 'Invalid payment method. Allowed options are: Credit Card, Debit Card, Net Banking, COD' });
+        if (!paymentMethod) {
+            return res.status(400).json({ message: 'Invalid payment method.' });
         }
-
         await User.findByIdAndUpdate(req.userId, { address: req.body.shippingAddress });
 
         const orderData = {
