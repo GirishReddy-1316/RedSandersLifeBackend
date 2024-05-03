@@ -10,7 +10,7 @@ const APP_BE_URL = "http://localhost:3000/api";
 
 const initiatePayment = async (req, res, next) => {
     const amount = +req.query.amount;
-    let userId = "MUID123";
+    let userId = "MUID1234";
     let merchantTransactionId = uniqid();
 
     let normalPayLoad = {
@@ -18,7 +18,7 @@ const initiatePayment = async (req, res, next) => {
         merchantTransactionId: merchantTransactionId,
         merchantUserId: userId,
         amount: amount * 100,
-        redirectUrl: `https://redsanderslifeproducts.web.app/checkout?merchantTransactionId=${merchantTransactionId}`,
+        redirectUrl: `http://localhost:5173/checkout?merchantTransactionId=${merchantTransactionId}`,
         redirectMode: "REDIRECT",
         mobileNumber: "9999999999",
         paymentInstrument: {
@@ -56,7 +56,6 @@ const initiatePayment = async (req, res, next) => {
 
 const validatePayment = async (req, res) => {
     const { merchantTransactionId } = req.params;
-    console.log(merchantTransactionId, "Merchant transaction")
     if (merchantTransactionId) {
         let statusUrl =
             `${PHONE_PE_HOST_URL}/pg/v1/status/${MERCHANT_ID}/` +
@@ -77,16 +76,16 @@ const validatePayment = async (req, res) => {
                 },
             });
             if (response.data && response.data.code === "PAYMENT_SUCCESS") {
-                res.send(response.data);
+                res.status(200).send(response.data);
             } else {
-                res.redirect(`https://redsanderslifeproducts.web.app/checkout`)
+                res.redirect(`http://localhost:5173/checkout?merchantTransactionId=${merchantTransactionId}`)
             }
         } catch (error) {
             console.log(error);
-            res.redirect(`https://redsanderslifeproducts.web.app/checkout`)
+            res.redirect(`http://localhost:5173/checkout?merchantTransactionId=${merchantTransactionId}`)
         }
     } else {
-        res.send("Sorry!! Error");
+        res.status(500).send({ message: "Invalid merchant transaction ID." });
     }
 };
 

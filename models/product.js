@@ -27,13 +27,12 @@ const productSchema = new mongoose.Schema({
         required: true
     },
     featured: {
-        type: Boolean,
+        type: String,
         default: false
     },
     slug: {
         type: String,
-        required: true,
-        unique: true
+        required: true
     },
     desc: {
         type: String,

@@ -45,6 +45,7 @@ exports.createProduct = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
     try {
+        console.log(req.body)
         const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
@@ -91,10 +92,10 @@ exports.searchProducts = async (req, res) => {
 
 exports.insertProducts = async (req, res) => {
     try {
-        const productsToInsert = req.body;
 
-        const insertedProducts = await Product.insertMany(productsToInsert);
-        res.status(201).json({ message: 'Products inserted successfully', insertedProducts });
+        const productsToInsert = req.body;
+        const insertedProducts = await Product.insertMany([productsToInsert]);
+        res.status(201).json({ message: 'Products inserted successfully' });
     } catch (error) {
         console.error('Error inserting products:', error);
         res.status(500).json({ message: 'Error inserting products' });

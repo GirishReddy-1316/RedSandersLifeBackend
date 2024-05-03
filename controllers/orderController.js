@@ -5,6 +5,7 @@ const GuestUser = require('../models/guest');
 
 exports.createOrder = async (req, res) => {
     try {
+        console.log("Creating order as user", req.body)
         const { products, totalPrice, shippingAddress, paymentMethod } = req.body;
 
         if (typeof totalPrice !== 'number' || totalPrice <= 0) {
@@ -15,9 +16,10 @@ exports.createOrder = async (req, res) => {
             return res.status(400).json({ message: 'Shipping address is required' });
         }
 
-        if (!paymentMethod) {
-            return res.status(400).json({ message: 'Invalid payment method.' });
-        }
+        // if (!paymentMethod) {
+        //     return res.status(400).json({ message: 'Invalid payment method.' });
+        // }
+        console.log(shippingAddress)
         let user = await User.findOne({ _id: req.userId });
         user.address = shippingAddress;
         user.save();
@@ -41,6 +43,7 @@ exports.createOrder = async (req, res) => {
 
 exports.createGuestOrder = async (req, res) => {
     try {
+        console.log("Creating order", req.body)
         const { products, totalPrice, shippingAddress, paymentMethod } = req.body;
 
         if (typeof totalPrice !== 'number' || totalPrice <= 0) {
@@ -112,7 +115,75 @@ exports.getAllOrders = async (req, res) => {
                 return res.status(404).json({ message: 'Order not found' });
             }
         } else {
-            orders = await Order.find({}).populate('products.productId', 'name brandName');
+            orders = await Order.aggregate([
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'customerId',
+                        foreignField: '_id',
+                        as: 'user'
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'guestusers',
+                        localField: 'customerId',
+                        foreignField: '_id',
+                        as: 'guestUser'
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'products',
+                        localField: 'products.productId',
+                        foreignField: '_id',
+                        as: 'productsOriginal'
+                    }
+                },
+                {
+                    $addFields: {
+                        mergedCustomer: { $concatArrays: ["$user", "$guestUser"] }
+                    }
+                },
+                {
+                    $unwind: "$mergedCustomer"
+                },
+                {
+                    $project: {
+                        products: {
+                            $map: {
+                                input: "$productsOriginal",
+                                as: "product",
+                                in: {
+                                    productId: "$$product._id",
+                                    quantity: {
+                                        $arrayElemAt: [
+                                            "$products.quantity",
+                                            { $indexOfArray: ["$products.productId", "$$product._id"] }
+                                        ]
+                                    },
+                                    name: "$$product.name",
+                                    brandName: "$$product.brandName",
+                                    _id: {
+                                        $arrayElemAt: [
+                                            "$products._id",
+                                            { $indexOfArray: ["$products.productId", "$$product._id"] }
+                                        ]
+                                    }
+                                }
+                            }
+                        },
+                        totalPrice: 1,
+                        shippingAddress: 1,
+                        paymentMethod: 1,
+                        status: 1,
+                        createdAt: 1,
+                        "mergedCustomer.username": 1,
+                        "mergedCustomer.email": 1,
+                        "mergedCustomer.phoneNumber": 1
+                    }
+                }
+            ]);
         }
         res.status(200).json(orders);
     } catch (error) {
