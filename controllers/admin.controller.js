@@ -97,6 +97,28 @@ exports.createAdmin = async (req, res) => {
     }
 };
 
+exports.createUser = async (req, res) => {
+    try {
+        const { username = "", phoneNumber, password, email } = req.body;
+
+        const existingUser = await User.findOne({ $or: [{ email }, { phoneNumber }] });
+        if (existingUser && existingUser.googleEmail && existingUser.googleEmail === email) {
+            return res.status(400).json({ message: 'Please continue with Google login as your account was created using Google' });
+        }
+        if (existingUser) {
+            return res.status(400).send({ message: 'email already exists' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = new User({ username, phoneNumber, password: hashedPassword, email });
+        await user.save();
+        res.status(201).send({ message: 'User created successfully' });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ message: 'Error creating user', error: error.message });
+    }
+};
+
 exports.getUsers = async (req, res) => {
     try {
         const users = await User.find({}, {
