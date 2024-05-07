@@ -4,8 +4,8 @@ const adminController = require('../controllers/admin.controller');
 const { adminAuth } = require('../middleware/admin.middleware');
 
 adminRouter.post('/login', adminController.adminLogin);
-// adminRouter.post('/forget-password', usersController.sendOTP);
-// adminRouter.post('/reset-password', usersController.resetPassword);
+adminRouter.post('/forget-password', adminController.sendOTP);
+adminRouter.post('/reset-password', adminController.resetPassword);
 adminRouter.post('/logout', adminAuth, adminController.adminLogout);
 adminRouter.post('/search', adminAuth, adminController.searchProducts);
 adminRouter.post('/oderList', adminAuth, adminController.getOrdersList);

@@ -1,8 +1,7 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/user');
 const sendEmail = require('../utils/sendEmail');
-const { generateOTP, generateToken } = require('../utils/generateOTP');
-const { default: mongoose } = require('mongoose');
+const { generate_OTP, generateToken } = require('../utils/generateOTP');
 
 // Temporary storage for OTPs and their expiry times
 let otpStorage = {};
@@ -17,7 +16,7 @@ exports.generateOTP = async (req, res) => {
         if (existingUser) {
             return res.status(400).json({ message: 'User already exists' });
         }
-        const otp = generateOTP(4);
+        const otp = generate_OTP(4);
         const otpExpiry = new Date(Date.now() + 10 * 60000); // Set OTP expiry (e.g., 10 minutes)
 
         otpStorage[email] = { otp, expiry: otpExpiry };
@@ -200,7 +199,7 @@ exports.sendOTP = async (req, res) => {
             return res.status(400).json({ message: 'Please continue with Google login as your account was created using Google' });
         }
 
-        const otp = generateOTP(4);
+        const otp = generate_OTP(4);
         user.otp = otp;
         user.otpExpiry = new Date(Date.now() + 10 * 60000);
         await user.save();

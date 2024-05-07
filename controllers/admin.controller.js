@@ -4,15 +4,16 @@ const Order = require('../models/order');
 const Product = require('../models/product');
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
-const { generateToken } = require('../utils/generateOTP');
+const { generateToken, generate_OTP } = require('../utils/generateOTP');
+const sendEmail = require('../utils/sendEmail');
 
 exports.adminLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
-        const admin = await Admin.findOne({ email });
+        const admin = await Admin.findOne({ email: { $regex: '^' + email + '$', $options: 'i' } });
 
         if (!admin) {
-            return res.status(404).json({ message: 'Admin not found' });
+            return res.status(401).json({ message: 'Admin not found' });
         }
         const passwordMatch = await bcrypt.compare(password, admin.password);
         if (!passwordMatch) {
@@ -35,6 +36,59 @@ exports.adminLogout = async (req, res) => {
     } catch (error) {
         console.error('Error logging out admin:', error);
         res.status(500).json({ message: 'Error logging out admin' });
+    }
+};
+
+exports.sendOTP = async (req, res) => {
+    console.log(req.body);
+    try {
+        const { email } = req.body; // Destructure email from req.body
+        if (!email) {
+            return res.status(400).json({ message: 'Invalid Input' });
+        }
+        const admin = await Admin.findOne({ email: { $regex: '^' + email + '$', $options: 'i' } });
+        if (!admin) {
+            return res.status(401).json({ message: 'Admin not found' });
+        }
+
+        const otp = generate_OTP(4);
+        admin.otp = otp;
+        admin.otpExpiry = new Date(Date.now() + 10 * 60000);
+        await admin.save();
+
+        await sendEmail(admin.email, 'Password Reset OTP', `Your OTP for password reset is: ${otp}`);
+
+        res.status(200).json({ message: 'OTP sent successfully', otp });
+    } catch (error) {
+        console.error('Error generating OTP:', error);
+        res.status(500).json({ message: 'Error generating OTP' });
+    }
+};
+
+
+exports.resetPassword = async (req, res) => {
+    try {
+        const { email, otp, password } = req.body;
+        const admin = await Admin.findOne({ email: { $regex: '^' + email + '$', $options: 'i' } });
+
+        if (!admin) {
+            return res.status(404).json({ message: 'Admin not found' });
+        }
+
+        if (admin.otp !== Number(otp) || admin.otpExpiry < new Date()) {
+            return res.status(400).json({ message: 'Invalid or expired OTP' });
+        }
+        admin.otp = null;
+        admin.otpExpiry = null;
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        admin.password = hashedPassword;
+        await admin.save();
+
+        res.status(200).json({ message: 'Password reset successful' });
+    } catch (error) {
+        console.error('Error resetting password:', error);
+        res.status(500).json({ message: 'Error resetting password' });
     }
 };
 
