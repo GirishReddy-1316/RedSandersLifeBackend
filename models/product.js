@@ -37,7 +37,15 @@ const productSchema = new mongoose.Schema({
     desc: {
         type: String,
         required: true
-    }
+    },
+    additionalBulletPoints: {
+        type: [String], // this should be store list of points
+    },
+    isProductReady: {
+        type: Boolean,
+        default: true
+    },
+
 });
 
 const Product = mongoose.model('Product', productSchema);
