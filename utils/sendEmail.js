@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
-const sendEmail = async (to, subject, text) => {
+const sendEmail = async (to, subject, message) => {
     try {
         if (!process.env.SMTP_EMAIL || !process.env.SMTP_PASSWORD) {
             throw new Error('SMTP_EMAIL or SMTP_PASSWORD environment variables are not provided');
@@ -20,7 +20,7 @@ const sendEmail = async (to, subject, text) => {
             from: process.env.SMTP_EMAIL,
             to,
             subject,
-            text,
+            html: message
         };
 
         transporter.sendMail(mailOptions, (error, info) => {

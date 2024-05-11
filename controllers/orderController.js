@@ -2,10 +2,11 @@ const { default: mongoose } = require('mongoose');
 const Order = require('../models/order');
 const User = require('../models/user');
 const GuestUser = require('../models/guest');
+const sendEmail = require('../utils/sendEmail');
+const createOrderConfirmationEmail = require('../template/sendingOrder');
 
 exports.createOrder = async (req, res) => {
     try {
-        console.log("Creating order as user", req.body)
         const { products, totalPrice, shippingAddress, paymentMethod } = req.body;
 
         if (typeof totalPrice !== 'number' || totalPrice <= 0) {
@@ -19,7 +20,6 @@ exports.createOrder = async (req, res) => {
         // if (!paymentMethod) {
         //     return res.status(400).json({ message: 'Invalid payment method.' });
         // }
-        console.log(shippingAddress)
         let user = await User.findOne({ _id: req.userId });
         user.address = shippingAddress;
         user.save();
@@ -34,6 +34,9 @@ exports.createOrder = async (req, res) => {
         };
 
         const order = await Order.create(orderData);
+        const orders = await Order.find({ customerId: req.userId, _id: order._id }).populate('products.productId', 'name brandName');
+        const getHtmlResponse = createOrderConfirmationEmail(orders[0])
+        await sendEmail(user.email, 'Order Details', getHtmlResponse);
         res.status(201).json({ orderId: order._id });
     } catch (error) {
         console.error('Error creating order:', error);
@@ -43,7 +46,6 @@ exports.createOrder = async (req, res) => {
 
 exports.createGuestOrder = async (req, res) => {
     try {
-        console.log("Creating order", req.body)
         const { products, totalPrice, shippingAddress, paymentMethod } = req.body;
 
         if (typeof totalPrice !== 'number' || totalPrice <= 0) {
@@ -79,6 +81,9 @@ exports.createGuestOrder = async (req, res) => {
             status: 'Placed'
         };
         const guestOrder = await Order.create(guestOrderData);
+        const orders = await Order.find({ customerId: guestUser._id, _id: guestOrder._id }).populate('products.productId', 'name brandName');
+        const getHtmlResponse = createOrderConfirmationEmail(orders[0])
+        await sendEmail(shippingAddress.email, 'Order Details', getHtmlResponse);
         res.status(201).json({ orderId: guestOrder._id });
     } catch (error) {
         console.error('Error creating guest order:', error);

@@ -15,7 +15,7 @@ exports.saveContactDetails = async (req, res) => {
         await contact.save();
 
         // Send email notification to admin
-        await sendEmail(process.env.SMTP_EMAIL, 'New Contact Details', `Name: ${custName}\nEmail: ${email}\nMobile: ${mobile}\nMessage: ${message}`);
+        await sendEmail("sahu86744@gmail.com", 'New Contact Details', `Name: ${custName}\nEmail: ${email}\nMobile: ${mobile}\nMessage: ${message}`);
 
         res.status(201).json({ message: 'Contact details saved successfully' });
     } catch (error) {
