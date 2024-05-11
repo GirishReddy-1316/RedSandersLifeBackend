@@ -45,6 +45,9 @@ const productSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    ingredients: {
+        type: String,
+    }
 
 });
 
