@@ -39,7 +39,10 @@ const productSchema = new mongoose.Schema({
         required: true
     },
     additionalBulletPoints: {
-        type: [String], // this should be store list of points
+        type: [{
+            heading: { type: String, default: "" },
+            description: { type: String, default: "" }
+        }],
     },
     isProductReady: {
         type: Boolean,
