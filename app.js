@@ -87,6 +87,10 @@ app.get('/auth/google/callback',
     }
 );
 
+app.get("/", (req, res) => {
+    res.send("Welcome to the server!");
+})
+
 
 
 app.use('/api/user', usersRouter);
