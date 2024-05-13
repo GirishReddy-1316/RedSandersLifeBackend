@@ -67,7 +67,7 @@ app.get('/auth/google/callback',
                     googleId: id,
                     profilePicture,
                     username: displayName,
-                    phoneNumber: id
+                    phoneNumber: "NA"
                 });
             } else {
                 user.username = displayName;
