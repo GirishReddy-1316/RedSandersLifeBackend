@@ -8,7 +8,7 @@ adminRouter.post('/forget-password', adminController.sendOTP);
 adminRouter.post('/reset-password', adminController.resetPassword);
 adminRouter.post('/logout', adminAuth, adminController.adminLogout);
 adminRouter.post('/search', adminAuth, adminController.searchProducts);
-adminRouter.post('/oderList', adminAuth, adminController.getOrdersList);
+adminRouter.get('/orderList', adminAuth, adminController.getOrdersList);
 adminRouter.post('/users/create', adminController.createUser);
 adminRouter.post('/create', adminController.createAdmin);
 adminRouter.delete('/users/:id', adminAuth, adminController.deleteUser);

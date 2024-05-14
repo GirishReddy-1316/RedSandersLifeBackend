@@ -122,9 +122,158 @@ exports.searchProducts = async (req, res) => {
 
 exports.getOrdersList = async (req, res) => {
     try {
-        const orders = await Order.find({})
-            .populate('customerId', 'username email phoneNumber address').sort({ createdAt: -1 });
-        res.status(200).json(orders);
+        const fromDateStr = req.query.fromDate;
+        const toDateStr = req.query.toDate;
+
+        const fromDate = fromDateStr ? new Date(fromDateStr + "T00:00:00Z") : null;
+        const toDate = toDateStr ? new Date(toDateStr + "T23:59:59Z") : null;
+        if (fromDate && toDate) {
+            console.log(fromDate, toDate);
+            const orders = await Order.aggregate([
+                {
+                    $match: { createdAt: { $gte: fromDate, $lte: toDate } }
+                },
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'customerId',
+                        foreignField: '_id',
+                        as: 'user'
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'guestusers',
+                        localField: 'customerId',
+                        foreignField: '_id',
+                        as: 'guestUser'
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'products',
+                        localField: 'products.productId',
+                        foreignField: '_id',
+                        as: 'productsOriginal'
+                    }
+                },
+                {
+                    $addFields: {
+                        mergedCustomer: { $concatArrays: ["$user", "$guestUser"] }
+                    }
+                },
+                {
+                    $unwind: "$mergedCustomer"
+                },
+                {
+                    $project: {
+                        products: {
+                            $map: {
+                                input: "$productsOriginal",
+                                as: "product",
+                                in: {
+                                    productId: "$$product._id",
+                                    quantity: {
+                                        $arrayElemAt: [
+                                            "$products.quantity",
+                                            { $indexOfArray: ["$products.productId", "$$product._id"] }
+                                        ]
+                                    },
+                                    name: "$$product.name",
+                                    brandName: "$$product.brandName",
+                                    _id: {
+                                        $arrayElemAt: [
+                                            "$products._id",
+                                            { $indexOfArray: ["$products.productId", "$$product._id"] }
+                                        ]
+                                    }
+                                }
+                            }
+                        },
+                        totalPrice: 1,
+                        shippingAddress: 1,
+                        paymentMethod: 1,
+                        status: 1,
+                        createdAt: 1,
+                        "mergedCustomer.username": 1,
+                        "mergedCustomer.email": 1,
+                        "mergedCustomer.phoneNumber": 1
+                    }
+                }
+            ]);
+            res.status(200).json(orders);
+        } else {
+            const orders = await Order.aggregate([
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'customerId',
+                        foreignField: '_id',
+                        as: 'user'
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'guestusers',
+                        localField: 'customerId',
+                        foreignField: '_id',
+                        as: 'guestUser'
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'products',
+                        localField: 'products.productId',
+                        foreignField: '_id',
+                        as: 'productsOriginal'
+                    }
+                },
+                {
+                    $addFields: {
+                        mergedCustomer: { $concatArrays: ["$user", "$guestUser"] }
+                    }
+                },
+                {
+                    $unwind: "$mergedCustomer"
+                },
+                {
+                    $project: {
+                        products: {
+                            $map: {
+                                input: "$productsOriginal",
+                                as: "product",
+                                in: {
+                                    productId: "$$product._id",
+                                    quantity: {
+                                        $arrayElemAt: [
+                                            "$products.quantity",
+                                            { $indexOfArray: ["$products.productId", "$$product._id"] }
+                                        ]
+                                    },
+                                    name: "$$product.name",
+                                    brandName: "$$product.brandName",
+                                    _id: {
+                                        $arrayElemAt: [
+                                            "$products._id",
+                                            { $indexOfArray: ["$products.productId", "$$product._id"] }
+                                        ]
+                                    }
+                                }
+                            }
+                        },
+                        totalPrice: 1,
+                        shippingAddress: 1,
+                        paymentMethod: 1,
+                        status: 1,
+                        createdAt: 1,
+                        "mergedCustomer.username": 1,
+                        "mergedCustomer.email": 1,
+                        "mergedCustomer.phoneNumber": 1
+                    }
+                }
+            ]);
+            res.status(200).json(orders);
+        }
     } catch (error) {
         console.error('Error fetching orders:', error);
         res.status(500).json({ message: 'Error fetching orders' });
@@ -174,22 +323,49 @@ exports.createUser = async (req, res) => {
 };
 
 exports.getUsers = async (req, res) => {
-    try {
-        const users = await User.find({}, {
-            username: 1,
-            email: 1,
-            phoneNumber: 1,
-            googleEmail: 1,
-            address: 1,
-            password: 1,
-            createdAt: 1
-        });
-        res.status(200).json(users);
-    } catch (error) {
-        res.status(500).send({ message: 'Error retrieving users', error: error.message });
+    const fromDateStr = req.query.fromDate;
+    const toDateStr = req.query.toDate;
+
+    const fromDate = fromDateStr ? new Date(fromDateStr + "T00:00:00Z") : null;
+    const toDate = toDateStr ? new Date(toDateStr + "T23:59:59Z") : null;
+
+    if (fromDate && toDate) {
+        try {
+            const users = await User.find({
+                createdAt: {
+                    $gte: fromDate,
+                    $lte: toDate
+                }
+            }, {
+                username: 1,
+                email: 1,
+                phoneNumber: 1,
+                googleEmail: 1,
+                address: 1,
+                password: 1,
+                createdAt: 1
+            });
+            res.status(200).json(users);
+        } catch (error) {
+            res.status(500).send({ message: 'Error retrieving users', error: error.message });
+        }
+    } else {
+        try {
+            const users = await User.find({}, {
+                username: 1,
+                email: 1,
+                phoneNumber: 1,
+                googleEmail: 1,
+                address: 1,
+                password: 1,
+                createdAt: 1
+            });
+            res.status(200).json(users);
+        } catch (error) {
+            res.status(500).send({ message: 'Error retrieving users', error: error.message });
+        }
     }
 };
-
 exports.deleteUser = async (req, res) => {
     const userId = req.params.id;
     try {
