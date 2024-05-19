@@ -2,10 +2,10 @@ const axios = require("axios");
 const sha256 = require("sha256");
 const uniqid = require("uniqid");
 
-const MERCHANT_ID = "PGTESTPAYUAT";
+const MERCHANT_ID = "PGTESTPAYUAT86";
 const PHONE_PE_HOST_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox";
 const SALT_INDEX = 1;
-const SALT_KEY = "099eb0cd-02cf-4e2a-8aca-3e6c6aff0399";
+const SALT_KEY = "96434309-7796-489d-8924-ab56988a6076";
 const APP_BE_URL = "http://localhost:3000/api";
 
 const initiatePayment = async (req, res, next) => {

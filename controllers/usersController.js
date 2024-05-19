@@ -189,7 +189,7 @@ exports.getProfile = async (req, res) => {
 exports.sendOTP = async (req, res) => {
     try {
         const { email, phone } = req.body;
-        const user = await User.findOne({ $or: [{ email: { $regex: '^' + emailOrPhone + '$', $options: '' } }, { phoneNumber: phone }] });
+        const user = await User.findOne({ $or: [{ email: { $regex: '^' + email + '$', $options: '' } }, { phoneNumber: phone }] });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
