@@ -2,6 +2,7 @@ const axios = require("axios");
 const sha256 = require("sha256");
 const uniqid = require("uniqid");
 
+require('dotenv').config();
 const MERCHANT_ID = "PGTESTPAYUAT86";
 const PHONE_PE_HOST_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox";
 const SALT_INDEX = 1;
@@ -78,11 +79,11 @@ const validatePayment = async (req, res) => {
             if (response.data && response.data.code === "PAYMENT_SUCCESS") {
                 res.status(200).send(response.data);
             } else {
-                res.redirect(`${clientURL}?merchantTransactionId=${merchantTransactionId}`)
+                res.redirect(`${process.env.CLIENT_URL}?merchantTransactionId=${merchantTransactionId}`)
             }
         } catch (error) {
             console.log(error);
-            res.redirect(`${clientURL}?merchantTransactionId=${merchantTransactionId}`)
+            res.redirect(`${process.env.CLIENT_URL}?merchantTransactionId=${merchantTransactionId}`)
         }
     } else {
         res.status(500).send({ message: "Invalid merchant transaction ID." });
