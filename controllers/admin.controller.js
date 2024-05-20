@@ -287,7 +287,7 @@ exports.createAdmin = async (req, res) => {
 
         const existingAdmin = await Admin.findOne({ email });
         if (existingAdmin) {
-            return res.status(400).send({ message: 'email already exists' });
+            return res.status(400).send({ message: 'email or phone number already exists' });
         }
         const hashedPassword = await bcrypt.hash(password, 10);
         const admin = new Admin({ username, email, password: hashedPassword });
@@ -309,7 +309,7 @@ exports.createUser = async (req, res) => {
             return res.status(400).json({ message: 'Please continue with Google login as your account was created using Google' });
         }
         if (existingUser) {
-            return res.status(400).send({ message: 'email already exists' });
+            return res.status(400).send({ message: 'email or phone number already exists' });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);

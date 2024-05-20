@@ -14,7 +14,7 @@ exports.generateOTP = async (req, res) => {
         const existingUser = await User.findOne({ $or: [{ email: { $regex: '^' + email + '$', $options: '' } }, { phoneNumber }] });
 
         if (existingUser) {
-            return res.status(400).json({ message: 'User already exists' });
+            return res.status(400).json({ message: 'email or phone number already exists' });
         }
         const otp = generate_OTP(4);
         const otpExpiry = new Date(Date.now() + 10 * 60000); // Set OTP expiry (e.g., 10 minutes)
@@ -73,7 +73,7 @@ exports.createUser = async (req, res) => {
             return res.status(400).json({ message: 'Please continue with Google login as your account was created using Google' });
         }
         if (existingUser) {
-            return res.status(400).send({ message: 'email already exists' });
+            return res.status(400).send({ message: 'email or phone number already exists' });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
