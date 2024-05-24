@@ -94,7 +94,7 @@ exports.insertProducts = async (req, res) => {
     try {
 
         const productsToInsert = req.body;
-        const insertedProducts = await Product.insertMany([productsToInsert]);
+        await Product.insertMany([productsToInsert]);
         res.status(201).json({ message: 'Products inserted successfully' });
     } catch (error) {
         console.error('Error inserting products:', error);

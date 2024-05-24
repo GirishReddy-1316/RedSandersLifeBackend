@@ -42,7 +42,7 @@ exports.adminLogout = async (req, res) => {
 exports.sendOTP = async (req, res) => {
     console.log(req.body);
     try {
-        const { email } = req.body; // Destructure email from req.body
+        const { email } = req.body;
         if (!email) {
             return res.status(400).json({ message: 'Invalid Input' });
         }
@@ -306,7 +306,7 @@ exports.createUser = async (req, res) => {
 
         const existingUser = await User.findOne({ $or: [{ email }, { phoneNumber }] });
         if (existingUser && existingUser.googleEmail && existingUser.googleEmail === email) {
-            return res.status(400).json({ message: 'Please continue with Google login as your account was created using Google' });
+            return res.status(400).send({ message: 'User account created with Google, use Google sign-in' });
         }
         if (existingUser) {
             return res.status(400).send({ message: 'email or phone number already exists' });
@@ -382,7 +382,7 @@ exports.deleteUser = async (req, res) => {
 
 exports.EditUser = async (req, res) => {
     const userId = req.params.id;
-    const { username, email, phoneNumber, address } = req.body;  // assuming fields to update
+    const { username, email, phoneNumber, address } = req.body;
     try {
         console.log(req.body);
         const updatedUser = await User.findByIdAndUpdate(userId, { username, email }, { new: true });

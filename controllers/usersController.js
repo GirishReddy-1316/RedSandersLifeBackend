@@ -51,7 +51,6 @@ exports.verifyOTP = async (req, res) => {
 
         res.status(200).json({ message: 'OTP verified successfully' });
     } catch (error) {
-        console.error('Error verifying OTP:', error);
         res.status(500).json({ message: 'Error verifying OTP' });
     }
 };
@@ -122,48 +121,10 @@ exports.loginUser = async (req, res) => {
         res.status(500).send({ message: 'Error logging in', error: error.message });
     }
 };
-``
-// google profile
-exports.createProfile = async (req, res) => {
-    try {
-        const { id, emails } = req.user;
-        const googleEmail = emails[0].value;
-        const user = await User.findOne({ email: googleEmail });
-        if (!user) {
-            const newUser = new User({ email: googleEmail, googleId: id, googleEmail });
-            await newUser.save();
-            const token = generateToken(id, googleEmail);
-            const formattedUser = {
-                _id: newUser._id,
-                email: newUser.email,
-                username: newUser.username,
-                googleEmail: newUser.googleEmail
-            };
-            return res.status(200).json({ user: formattedUser, token });
-        } else {
-            if (!user.googleId) user.googleId = id;
-            if (!user.googleEmail) user.googleEmail = googleEmail;
-            await user.save();
-            const token = generateToken(id, googleEmail);
-            const formattedUser = {
-                _id: user._id,
-                email: user.email,
-                username: user.username,
-                googleEmail: user.googleEmail
-            };
-            return res.status(200).json({ user: formattedUser, token });
-        }
-    } catch (error) {
-        console.error('Error saving user data:', error);
-        return res.status(500).send('Failed to save user data');
-    }
-}
 
 exports.getProfile = async (req, res) => {
     try {
         const userId = req.userId;
-        console.log("userId: " + typeof (userId), userId);
-
         const user = await User.findById(userId);
 
         if (user) {
@@ -206,9 +167,8 @@ exports.sendOTP = async (req, res) => {
 
         await sendEmail(user.email, 'Password Reset OTP', `Your OTP for password reset is: ${otp}`);
 
-        res.status(200).json({ message: 'OTP sent successfully', otp });
+        res.status(200).json({ message: 'OTP sent successfully' });
     } catch (error) {
-        console.error('Error generating OTP:', error);
         res.status(500).json({ message: 'Error generating OTP' });
     }
 };
@@ -235,7 +195,6 @@ exports.verifyPasswordOTP = async (req, res) => {
         await user.save();
         res.status(200).json({ message: 'OTP verify successful' });
     } catch (error) {
-        console.error('Error Otp verify:', error);
         res.status(500).json({ message: 'Error Otp verify' });
     }
 }
@@ -256,7 +215,6 @@ exports.resetPassword = async (req, res) => {
 
         res.status(200).json({ message: 'Password reset successful' });
     } catch (error) {
-        console.error('Error resetting password:', error);
         res.status(500).json({ message: 'Error resetting password' });
     }
 };
@@ -296,7 +254,6 @@ exports.logout = async (req, res) => {
 
         return res.status(200).json({ message: 'Logout successful' });
     } catch (error) {
-        console.error('Error logging out:', error);
         return res.status(500).json({ message: 'Error logging out', error: error.message });
     }
 };
@@ -310,7 +267,6 @@ exports.updateUser = async (req, res) => {
         if (!user) {
             return res.status(404).send({ message: 'User not found' });
         }
-        // Hash the password if it's being updated
         if (password) {
             const hashedPassword = await bcrypt.hash(password, 10);
             user.password = hashedPassword;
@@ -334,7 +290,6 @@ exports.deleteUser = async (req, res) => {
         await User.deleteOne({ _id: req.params.id });
         res.status(200).send({ message: 'User deleted successfully' });
     } catch (error) {
-        console.log(error)
         res.status(500).send({ message: 'Error deleting user', error: error.message });
     }
 };

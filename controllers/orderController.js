@@ -97,7 +97,6 @@ exports.getOrdersByUserId = async (req, res) => {
         if (!userId) {
             return res.status(400).json({ message: 'User ID is required' });
         }
-        console.log(userId);
         const orders = await Order.find({ customerId: userId }).populate('products.productId', 'name brandName');
         res.status(200).json(orders);
     } catch (error) {
@@ -192,7 +191,6 @@ exports.getAllOrders = async (req, res) => {
         }
         res.status(200).json(orders);
     } catch (error) {
-        console.error('Error fetching orders:', error);
         res.status(500).json({ message: 'Error fetching orders' });
     }
 };
@@ -205,7 +203,6 @@ exports.getOrdersByOrderId = async (req, res) => {
         const orders = await Order.find({ _id: orderId }).populate('products.productId', 'name brandName');
         res.status(200).json(orders);
     } catch (error) {
-        console.error('Error fetching orders:', error);
         res.status(500).json({ message: 'Error fetching orders' });
     }
 };
