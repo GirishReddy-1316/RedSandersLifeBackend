@@ -19,7 +19,7 @@ const initiatePayment = async (req, res, next) => {
         merchantTransactionId: merchantTransactionId,
         merchantUserId: userId,
         amount: amount * 100,
-        redirectUrl: `${process.env.CLIENT_URL}/checkout?merchantTransactionId=${merchantTransactionId}`,
+        redirectUrl: `${process.env.CLIENT_URL}checkout?merchantTransactionId=${merchantTransactionId}`,
         redirectMode: "REDIRECT",
         mobileNumber: "9999999999",
         paymentInstrument: {
