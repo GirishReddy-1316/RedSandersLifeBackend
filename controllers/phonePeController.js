@@ -79,11 +79,10 @@ const validatePayment = async (req, res) => {
             if (response.data && response.data.code === "PAYMENT_SUCCESS") {
                 res.status(200).send(response.data);
             } else {
-                res.redirect(`${process.env.CLIENT_URL}?merchantTransactionId=${merchantTransactionId}`)
+                return res.status(400).send({ message: "Payment validation failed" });
             }
         } catch (error) {
-            console.log(error);
-            res.redirect(`${process.env.CLIENT_URL}?merchantTransactionId=${merchantTransactionId}`)
+            return res.status(500).send({ message: "Error validating payment" });
         }
     } else {
         res.status(500).send({ message: "Invalid merchant transaction ID." });
