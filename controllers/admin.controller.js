@@ -369,7 +369,9 @@ exports.getUsers = async (req, res) => {
 exports.deleteUser = async (req, res) => {
     const userId = req.params.id;
     try {
-        const deletedUser = await User.findByIdAndDelete(userId);
+        // status_type: 'deleted' is used to keep the user data in the database
+        const deletedUser = await User.findByIdAndUpdate(userId, { status_type: 'deleted' });
+
         if (!deletedUser) {
             return res.status(404).send({ message: 'User not found' });
         }

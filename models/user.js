@@ -16,7 +16,8 @@ const userSchema = new mongoose.Schema({
     razorpayId: { type: String },
     address: { type: mongoose.Schema.Types.Mixed, default: {} },
     createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now }
+    updatedAt: { type: Date, default: Date.now },
+    status_type: { type: String, default: 'active' }
 });
 
 const User = mongoose.model('User', userSchema);

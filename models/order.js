@@ -39,6 +39,10 @@ const orderSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
+    },
+    status_type: {
+        type: String,
+        default: 'active'
     }
 });
 

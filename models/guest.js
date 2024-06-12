@@ -6,7 +6,8 @@ const guestUserSchema = new mongoose.Schema({
     phoneNumber: { type: String },
     address: { type: mongoose.Schema.Types.Mixed },
     createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now }
+    updatedAt: { type: Date, default: Date.now },
+    status_type: { type: String, default: 'active' }
 });
 
 const GuestUser = mongoose.model('GuestUser', guestUserSchema);

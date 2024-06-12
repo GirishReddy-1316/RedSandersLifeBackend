@@ -50,6 +50,10 @@ const productSchema = new mongoose.Schema({
     },
     ingredients: {
         type: String,
+    },
+    status_type: {
+        type: String,
+        default: 'active'
     }
 
 });

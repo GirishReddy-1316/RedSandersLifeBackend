@@ -9,7 +9,8 @@ const adminSchema = new mongoose.Schema({
     accessToken: { type: String },
     profilePicture: { type: String },
     createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now }
+    updatedAt: { type: Date, default: Date.now },
+    status_type: { type: String, default: 'active' }
 });
 
 const Admin = mongoose.model('Admin', adminSchema);

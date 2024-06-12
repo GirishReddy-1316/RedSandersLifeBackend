@@ -14,7 +14,8 @@ const contactSchema = new mongoose.Schema({
     },
     message: {
         type: String
-    }
+    },
+    status_type: { type: String, default: 'active' }
 });
 
 const Contact = mongoose.model('Contact', contactSchema);

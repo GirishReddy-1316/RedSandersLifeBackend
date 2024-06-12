@@ -231,7 +231,7 @@ exports.deleteOrder = async (req, res) => {
         if (!orderId) {
             return res.status(400).json({ message: 'Order ID is required' });
         }
-        const deletedOrder = await Order.findByIdAndDelete(orderId);
+        const deletedOrder = await Order.findByIdAndUpdate(orderId, { status_type: 'deleted' });
         if (!deletedOrder) {
             return res.status(404).json({ message: 'Order not found' });
         }
