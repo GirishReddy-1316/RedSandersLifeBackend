@@ -1,4 +1,3 @@
-
 const Admin = require('../models/admin');
 const Order = require('../models/order');
 const Product = require('../models/product');
@@ -10,7 +9,7 @@ const sendEmail = require('../utils/sendEmail');
 exports.adminLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
-        const admin = await Admin.findOne({ email: { $regex: '^' + email + '$', $options: 'i' } });
+        const admin = await Admin.findOne({ email: { $regex: '^' + email + '$', $options: 'i' }, status_type: "active" });
 
         if (!admin) {
             return res.status(401).json({ message: 'Admin not found' });
@@ -40,13 +39,12 @@ exports.adminLogout = async (req, res) => {
 };
 
 exports.sendOTP = async (req, res) => {
-    console.log(req.body);
     try {
         const { email } = req.body;
         if (!email) {
             return res.status(400).json({ message: 'Invalid Input' });
         }
-        const admin = await Admin.findOne({ email: { $regex: '^' + email + '$', $options: 'i' } });
+        const admin = await Admin.findOne({ email: { $regex: '^' + email + '$', $options: 'i' }, status_type: "active" });
         if (!admin) {
             return res.status(401).json({ message: 'Admin not found' });
         }
@@ -65,11 +63,10 @@ exports.sendOTP = async (req, res) => {
     }
 };
 
-
 exports.resetPassword = async (req, res) => {
     try {
         const { email, otp, password } = req.body;
-        const admin = await Admin.findOne({ email: { $regex: '^' + email + '$', $options: 'i' } });
+        const admin = await Admin.findOne({ email: { $regex: '^' + email + '$', $options: 'i' }, status_type: "active" });
 
         if (!admin) {
             return res.status(404).json({ message: 'Admin not found' });
@@ -100,7 +97,10 @@ exports.searchProducts = async (req, res) => {
             return res.status(400).json({ message: 'Keyword is required for search' });
         }
 
-        const products = await Product.find({ $text: { $search: keyword } }, { score: { $meta: 'textScore' } })
+        const products = await Product.find({
+            $text: { $search: keyword },
+            status_type: "active"
+        }, { score: { $meta: 'textScore' } })
             .sort({ score: { $meta: 'textScore' } })
             .lean(); // Convert Mongoose documents to plain JavaScript objects
 
@@ -128,10 +128,9 @@ exports.getOrdersList = async (req, res) => {
         const fromDate = fromDateStr ? new Date(fromDateStr + "T00:00:00Z") : null;
         const toDate = toDateStr ? new Date(toDateStr + "T23:59:59Z") : null;
         if (fromDate && toDate) {
-            console.log(fromDate, toDate);
             const orders = await Order.aggregate([
                 {
-                    $match: { createdAt: { $gte: fromDate, $lte: toDate } }
+                    $match: { createdAt: { $gte: fromDate, $lte: toDate }, status_type: "active" }
                 },
                 {
                     $lookup: {
@@ -204,6 +203,9 @@ exports.getOrdersList = async (req, res) => {
             res.status(200).json(orders);
         } else {
             const orders = await Order.aggregate([
+                {
+                    $match: { status_type: "active" }
+                },
                 {
                     $lookup: {
                         from: 'users',
@@ -280,7 +282,6 @@ exports.getOrdersList = async (req, res) => {
     }
 };
 
-
 exports.createAdmin = async (req, res) => {
     try {
         const { username, email, password } = req.body;
@@ -290,7 +291,7 @@ exports.createAdmin = async (req, res) => {
             return res.status(400).send({ message: 'email or phone number already exists' });
         }
         const hashedPassword = await bcrypt.hash(password, 10);
-        const admin = new Admin({ username, email, password: hashedPassword });
+        const admin = new Admin({ username, email, password: hashedPassword, status_type: "active" });
 
         await admin.save();
         res.status(201).json({ message: 'Admin created successfully' });
@@ -313,7 +314,7 @@ exports.createUser = async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = new User({ username, phoneNumber, password: hashedPassword, email });
+        const user = new User({ username, phoneNumber, password: hashedPassword, email, status_type: "active" });
         await user.save();
         res.status(201).send({ message: 'User created successfully' });
     } catch (error) {
@@ -335,7 +336,8 @@ exports.getUsers = async (req, res) => {
                 createdAt: {
                     $gte: fromDate,
                     $lte: toDate
-                }
+                },
+                status_type: "active"
             }, {
                 username: 1,
                 email: 1,
@@ -351,7 +353,7 @@ exports.getUsers = async (req, res) => {
         }
     } else {
         try {
-            const users = await User.find({}, {
+            const users = await User.find({ status_type: "active" }, {
                 username: 1,
                 email: 1,
                 phoneNumber: 1,
@@ -366,11 +368,18 @@ exports.getUsers = async (req, res) => {
         }
     }
 };
+
 exports.deleteUser = async (req, res) => {
     const userId = req.params.id;
     try {
-        // status_type: 'deleted' is used to keep the user data in the database
-        const deletedUser = await User.findByIdAndUpdate(userId, { status_type: 'deleted' });
+        const deletedUser = await User.findByIdAndUpdate(userId, {
+            status_type: 'deleted',
+            email: "",
+            phoneNumber: "",
+            username: "",
+            googleEmail: "",
+            googleId: "",
+        });
 
         if (!deletedUser) {
             return res.status(404).send({ message: 'User not found' });
@@ -381,13 +390,12 @@ exports.deleteUser = async (req, res) => {
     }
 };
 
-
 exports.EditUser = async (req, res) => {
     const userId = req.params.id;
     const { username, email, phoneNumber, address } = req.body;
     try {
         console.log(req.body);
-        const updatedUser = await User.findByIdAndUpdate(userId, { username, email }, { new: true });
+        const updatedUser = await User.findByIdAndUpdate(userId, { username, email, phoneNumber, address }, { new: true });
         if (!updatedUser) {
             return res.status(404).send({ message: 'User not found' });
         }

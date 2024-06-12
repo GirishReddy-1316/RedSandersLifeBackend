@@ -1,9 +1,8 @@
 const Product = require("../models/product");
 
-
 exports.getAllProducts = async (req, res) => {
     try {
-        const products = await Product.find();
+        const products = await Product.find({ status_type: "active" });
         res.status(200).json(products);
     } catch (error) {
         console.error('Error fetching products:', error);
@@ -14,7 +13,7 @@ exports.getAllProducts = async (req, res) => {
 exports.getProductById = async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
-        if (!product) {
+        if (!product || product.status_type !== "active") {
             return res.status(404).json({ message: 'Product not found' });
         }
         res.status(200).json(product);
@@ -45,9 +44,8 @@ exports.createProduct = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
     try {
-        console.log(req.body)
         const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!product) {
+        if (!product || product.status_type !== "active") {
             return res.status(404).json({ message: 'Product not found' });
         }
         res.status(200).json(product);
@@ -59,7 +57,6 @@ exports.updateProduct = async (req, res) => {
 
 exports.deleteProduct = async (req, res) => {
     try {
-
         const product = await Product.findByIdAndUpdate(req.params.id, {
             status_type: 'deleted'
         });
@@ -82,6 +79,7 @@ exports.searchProducts = async (req, res) => {
         }
 
         const products = await Product.find({
+            status_type: "active",
             $or: [
                 { name: { $regex: keyword, $options: 'i' } },
                 { category: { $regex: keyword, $options: 'i' } }
