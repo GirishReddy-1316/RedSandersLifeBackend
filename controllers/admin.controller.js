@@ -372,13 +372,17 @@ exports.getUsers = async (req, res) => {
 exports.deleteUser = async (req, res) => {
     const userId = req.params.id;
     try {
+        const user = await User.findOne({ id: userId });
+        if (!user) {
+            return res.status(404).send({ message: 'User not found' });
+        }
         const deletedUser = await User.findByIdAndUpdate(userId, {
             status_type: 'deleted',
-            email: "",
-            phoneNumber: "",
-            username: "",
-            googleEmail: "",
-            googleId: "",
+            email: `${user.email}-deleted`,
+            phoneNumber: `${user.phoneNumber}-deleted`,
+            username: `${user.username}-deleted`,
+            googleEmail: `${user.googleEmail}-deleted`,
+            googleId: `${user.googleId}-deleted`
         });
 
         if (!deletedUser) {
