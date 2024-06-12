@@ -372,7 +372,7 @@ exports.getUsers = async (req, res) => {
 exports.deleteUser = async (req, res) => {
     const userId = req.params.id;
     try {
-        const user = await User.findOne({ id: userId });
+        const user = await User.findOne({ _id: userId });
         if (!user) {
             return res.status(404).send({ message: 'User not found' });
         }
