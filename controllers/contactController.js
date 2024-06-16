@@ -1,4 +1,5 @@
 const Contact = require("../models/contact");
+const sendContactDetailsEmail = require("../template/sendContactDetailsEmail");
 const sendEmail = require("../utils/sendEmail");
 
 exports.saveContactDetails = async (req, res) => {
@@ -13,9 +14,16 @@ exports.saveContactDetails = async (req, res) => {
         });
 
         await contact.save();
+        let paload = {
+            custName,
+            email,
+            mobile,
+            message
+        }
 
-        // Send email notification to admin
-        await sendEmail(process.env.SMTP_EMAIL, 'New Contact Details', `Name: ${custName}\nEmail: ${email}\nMobile: ${mobile}\nMessage: ${message}`);
+        let emailMessage = sendContactDetailsEmail(paload);;
+
+        await sendEmail(process.env.SMTP_EMAIL, 'Contact Details', emailMessage);
 
         res.status(201).json({ message: 'Contact details saved successfully' });
     } catch (error) {

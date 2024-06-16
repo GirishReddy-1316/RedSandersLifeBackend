@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const User = require('../models/user');
 const sendEmail = require('../utils/sendEmail');
 const { generate_OTP, generateToken } = require('../utils/generateOTP');
+const sendOTP = require('../template/sendingOTP');
 
 // Temporary storage for OTPs and their expiry times
 let otpStorage = {};
@@ -21,8 +22,8 @@ exports.generateOTP = async (req, res) => {
 
         otpStorage[email] = { otp, expiry: otpExpiry };
         otpStorage[phoneNumber] = { otp, expiry: otpExpiry };
-
-        await sendEmail(email, 'Verification OTP', `Your OTP for verification is: ${otp}`);
+        const getHtmlResponse = sendOTP(otp)
+        await sendEmail(email, 'Verification OTP', getHtmlResponse);
 
         // await sendSMS(phoneNumber, `Your OTP for verification is: ${otp}`);
 
@@ -164,9 +165,8 @@ exports.sendOTP = async (req, res) => {
         user.otp = otp;
         user.otpExpiry = new Date(Date.now() + 10 * 60000);
         await user.save();
-
-        await sendEmail(user.email, 'Password Reset OTP', `Your OTP for password reset is: ${otp}`);
-
+        const getHtmlResponse = sendOTP(otp)
+        await sendEmail(user.email, 'Password Reset OTP', getHtmlResponse);
         res.status(200).json({ message: 'OTP sent successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Error generating OTP' });

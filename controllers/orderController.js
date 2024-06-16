@@ -34,7 +34,7 @@ exports.createOrder = async (req, res) => {
         };
 
         const order = await Order.create(orderData);
-        const orders = await Order.find({ customerId: req.userId, _id: order._id }).populate('products.productId', 'name brandName');
+        const orders = await Order.find({ customerId: req.userId, _id: order._id }).populate('products.productId', 'image name brandName price');
         const getHtmlResponse = createOrderConfirmationEmail(orders[0])
         await sendEmail(user.email, 'Order Details', getHtmlResponse);
         res.status(201).json({ orderId: order._id });
@@ -80,10 +80,16 @@ exports.createGuestOrder = async (req, res) => {
             paymentMethod,
             status: 'Placed'
         };
+
         const guestOrder = await Order.create(guestOrderData);
-        const orders = await Order.find({ customerId: guestUser._id, _id: guestOrder._id }).populate('products.productId', 'name brandName');
-        const getHtmlResponse = createOrderConfirmationEmail(orders[0])
+
+        let orders = await Order.find({ customerId: guestUser._id, _id: guestOrder._id }).populate('products.productId', 'image name brandName price');
+        orders[0].paymentMethod = paymentMethod;
+
+        const getHtmlResponse = createOrderConfirmationEmail(orders[0]);
+
         await sendEmail(shippingAddress.email, 'Order Details', getHtmlResponse);
+
         res.status(201).json({ orderId: guestOrder._id });
     } catch (error) {
         console.error('Error creating guest order:', error);
@@ -97,7 +103,7 @@ exports.getOrdersByUserId = async (req, res) => {
         if (!userId) {
             return res.status(400).json({ message: 'User ID is required' });
         }
-        const orders = await Order.find({ customerId: userId, status_type: "active" }).populate('products.productId', 'name brandName');
+        const orders = await Order.find({ customerId: userId, status_type: "active" }).populate('products.productId', 'image name brandName price');
         res.status(200).json(orders);
     } catch (error) {
         console.error('Error fetching orders:', error);
@@ -114,7 +120,7 @@ exports.getAllOrders = async (req, res) => {
             if (!isValidObjectId) {
                 return res.status(400).json({ message: 'Invalid orderId format' });
             }
-            orders = await Order.find({ _id: orderId, status_type: "active" }).populate('products.productId', 'name brandName');
+            orders = await Order.find({ _id: orderId, status_type: "active" }).populate('products.productId', 'image name brandName price');
             if (!orders || orders.length === 0) {
                 return res.status(404).json({ message: 'Order not found' });
             }
@@ -200,7 +206,7 @@ exports.getOrdersByOrderId = async (req, res) => {
         if (!orderId) {
             return res.status(400).json({ message: 'Order ID is required' });
         }
-        const orders = await Order.find({ _id: orderId, status_type: "active" }).populate('products.productId', 'name brandName');
+        const orders = await Order.find({ _id: orderId, status_type: "active" }).populate('products.productId', 'image name brandName price');
         res.status(200).json(orders);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching orders' });
