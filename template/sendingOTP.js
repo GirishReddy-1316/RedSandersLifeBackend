@@ -38,7 +38,6 @@ const sendOTP = (otp) => {
         }
 
         .otp-section {
-            width: 100%;
             background-color: #f9f9f9;
             border-radius: 8px;
             padding: 20px;

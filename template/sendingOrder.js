@@ -20,7 +20,7 @@ const createOrderConfirmationEmail = (orderData) => {
                     </div>
                 </div>
                 <div class="product-price">
-                    <p>Price: ₹${product.productId.price}</p>
+                    <p>Price: ${product.productId.price}</p>
                 </div>
             </div>`;
     }).join('');
