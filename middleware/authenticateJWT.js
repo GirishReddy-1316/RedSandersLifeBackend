@@ -1,11 +1,17 @@
 const jwt = require('jsonwebtoken');
 
 const authenticateJWT = (req, res, next) => {
-    const token = req?.headers?.authorization?.split(" ")[1];
-
-    if (!token) {
+    const authHeader = req?.headers?.authorization;
+    if (!authHeader) {
         return res.status(401).json({ message: 'Authentication token missing' });
     }
+
+    const tokenParts = authHeader.split(' ');
+    if (tokenParts.length !== 2 || tokenParts[0] !== 'Bearer') {
+        return res.status(400).json({ message: 'Invalid authorization format' });
+    }
+
+    const token = tokenParts[1];
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);

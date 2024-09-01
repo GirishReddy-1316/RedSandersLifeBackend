@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "nodemon index.js"
   },
   "author": "",
   "license": "ISC",
@@ -25,5 +25,8 @@
     "passport-google-oauth20": "^2.0.0",
     "sha256": "^0.2.0",
     "uniqid": "^5.4.0"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.6"
   }
 }
